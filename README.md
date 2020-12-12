@@ -19,8 +19,9 @@
 
 1. `git clone https://github.com/pushkaragnihotri/node-google-sheets`
 2. `npm i # install dependencies`
-3. `npm run dev # run the development environment`
-4. `import postman collection in postman to run apis`
-5. `hit login api`
-6. `open the url from terminal in browser and authorize the app to get a success code to be entered in the terminal.`
-7. `you're good to go to pull data from gsheet and update the cells in same`
+3. `create a googlesheet and enable google sheet api in the google developers console and download credentials to node-google-sheets/common/secrets/ folder`
+4. `npm run dev # run the development environment`
+5. `import postman collection in postman to run apis`
+6. `hit login api`
+7. `open the url from terminal in browser and authorize the app to get a success code to be entered in the terminal.`
+8. `you're good to go to pull data from gsheet and update the cells in same`
