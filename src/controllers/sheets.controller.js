@@ -79,4 +79,42 @@ function fetchData(request, response) {
 	}
 }
 
-module.exports = { login, fetchData }
+function updateData(request, response) {
+	// Authorize a client, then call the Google Sheets API.
+	authorize(response, updateDataCB)
+
+	function updateDataCB(auth) {
+		let spreadsheetId = request.body.spreadsheet_id || '16Co5uD5XcG_hlrc5-DAYwwe6n0-8O5uC0AYyd6L9j_I'
+		let sheetId = request.body.sheet_id || 'Sheet1'
+		let rowNumber = request.body.row_number || 1
+		let columnNumber = request.body.column_number || 'A'
+		let newValue = request.body.new_value || 'A'
+		let values = [[newValue]]
+		const resource = { values }
+		const sheets = google.sheets({ version: 'v4', auth })
+		sheets.spreadsheets.values.update(
+			{
+				spreadsheetId,
+				range: `${sheetId}!${rowNumber}:${columnNumber}`,
+				valueInputOption: 'RAW',
+				resource,
+			},
+			(err, res) => {
+				if (err) {
+					console.log(`The API returned an error: ${err}`)
+					return response.status(404).json({
+						success: false,
+						message: `The API returned an error: ${err}`,
+					})
+				}
+				return response.status(200).json({
+					success: true,
+					message: `Sheet updated successfully!`,
+					body: res.data,
+				})
+			}
+		)
+	}
+}
+
+module.exports = { login, fetchData, updateData }
