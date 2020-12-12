@@ -39,6 +39,7 @@ function fetchData(request, response) {
 					})
 				}
 				const rows = res.data.values
+				sheetName = res.data.range.split('!')[0]
 				if (rows.length) {
 					let result = {}
 					let spreadsheetData = []
@@ -49,7 +50,7 @@ function fetchData(request, response) {
 						}
 						spreadsheetData.push(rowData)
 					})
-					result[spreadsheetId] = spreadsheetData
+					result[sheetName] = spreadsheetData
 					console.log('result : ', result)
 					return response.status(200).json({
 						status: 'success',
