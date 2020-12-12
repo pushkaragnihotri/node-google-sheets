@@ -1,6 +1,7 @@
 const fs = require('fs')
 const { google } = require('googleapis')
-const { authorize, getNewToken } = require('../middlewares/gs.middleware')
+const { authorize } = require('../middlewares/gs.middleware')
+const { getNewToken } = require('../../common/services/gs.service')
 
 function login(_, response) {
 	// Load client secrets from a local file.
@@ -28,7 +29,7 @@ function login(_, response) {
 
 function fetchData(request, response) {
 	// Authorize a client, then call the Google Sheets API.
-	authorize(fetchDataCB)
+	authorize(response, fetchDataCB)
 
 	function fetchDataCB(auth) {
 		let spreadsheetId = request.body.spreadsheet_id || '16Co5uD5XcG_hlrc5-DAYwwe6n0-8O5uC0AYyd6L9j_I'

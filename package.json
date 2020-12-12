@@ -1,7 +1,7 @@
 {
 	"name": "node-google-sheets",
 	"version": "1.0.0",
-	"description": "A micro-service to fetch data and update data from a google sheet.",
+	"description": "A micro-service to fetch data and update data from a google sheet. (For reference: https://developers.google.com/sheets/api/quickstart/nodejs)",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
