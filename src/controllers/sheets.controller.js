@@ -1,25 +1,34 @@
 const fs = require('fs')
 const { google } = require('googleapis')
-const { authorize } = require('../middlewares/gs.middleware')
+const { authorize, getNewToken } = require('../middlewares/gs.middleware')
 
-/**
- * Prints the names and majors of students in a sample spreadsheet:
- * @see https://docs.google.com/spreadsheets/d/16Co5uD5XcG_hlrc5-DAYwwe6n0-8O5uC0AYyd6L9j_I/edit
- * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
- */
-function fetchData(request, response) {
+function login(_, response) {
 	// Load client secrets from a local file.
-	fs.readFile('./common/secrets/credentials.json', (err, content) => {
+	fs.readFile('./common/secrets/credentials.json', 'utf8', (err, content) => {
 		if (err) {
-			console.log(`Error loading client secret file: ${err}`)
+			console.log(`Error loading Google API credentials: ${err}`)
 			return response.status(500).json({
 				status: 'error',
-				message: `Error loading client secret file: ${err}`,
+				message: `Error loading Google API credentials: ${err}`,
 			})
 		}
-		// Authorize a client with credentials, then call the Google Sheets API.
-		authorize(JSON.parse(content), fetchDataCB)
+		content = JSON.parse(content)
+		const { client_secret, client_id, redirect_uris } = content.installed
+		const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0])
+
+		// create a new token
+		getNewToken(oAuth2Client)
+
+		return response.status(200).json({
+			status: 'success',
+			message: `Token created successfully!`,
+		})
 	})
+}
+
+function fetchData(request, response) {
+	// Authorize a client, then call the Google Sheets API.
+	authorize(fetchDataCB)
 
 	function fetchDataCB(auth) {
 		let spreadsheetId = request.body.spreadsheet_id || '16Co5uD5XcG_hlrc5-DAYwwe6n0-8O5uC0AYyd6L9j_I'
@@ -69,4 +78,4 @@ function fetchData(request, response) {
 	}
 }
 
-module.exports = { fetchData }
+module.exports = { login, fetchData }

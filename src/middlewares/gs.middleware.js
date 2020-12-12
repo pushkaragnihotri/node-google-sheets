@@ -15,17 +15,31 @@ const { SCOPES, TOKEN_PATH } = require('../../common/config/env.config')
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
-function authorize(credentials, callback) {
-	const { client_secret, client_id, redirect_uris } = credentials.installed
-	const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0])
-
-	// Check if we have previously stored a token.
-	fs.readFile(TOKEN_PATH, (err, token) => {
+function authorize(callback) {
+	// Load client secrets from a local file.
+	fs.readFile('./common/secrets/credentials.json', 'utf8', (err, content) => {
 		if (err) {
-			return getNewToken(oAuth2Client, callback)
+			console.log(`Error loading Google API credentials: ${err}`)
+			return response.status(500).json({
+				status: 'error',
+				message: `Error loading Google API credentials: ${err}`,
+			})
 		}
-		oAuth2Client.setCredentials(JSON.parse(token))
-		callback(oAuth2Client)
+		content = JSON.parse(content)
+		const { client_secret, client_id, redirect_uris } = content.installed
+		const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0])
+
+		// Check if we have previously stored a token.
+		fs.readFile(TOKEN_PATH, (err, token) => {
+			if (err) {
+				return response.status(401).json({
+					status: 'error',
+					message: `Authorization Required.`,
+				})
+			}
+			oAuth2Client.setCredentials(JSON.parse(token))
+			callback(oAuth2Client)
+		})
 	})
 }
 
@@ -35,7 +49,7 @@ function authorize(credentials, callback) {
  * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
  * @param {getEventsCallback} callback The callback for the authorized client.
  */
-function getNewToken(oAuth2Client, callback) {
+function getNewToken(oAuth2Client) {
 	const authUrl = oAuth2Client.generateAuthUrl({
 		access_type: 'offline',
 		scope: SCOPES,
@@ -55,9 +69,8 @@ function getNewToken(oAuth2Client, callback) {
 				if (err) return console.error(err)
 				console.log('Token stored to', TOKEN_PATH)
 			})
-			callback(oAuth2Client)
 		})
 	})
 }
 
-module.exports = { authorize }
+module.exports = { authorize, getNewToken }
